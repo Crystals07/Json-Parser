@@ -3,6 +3,8 @@ using namespace std;
 
 #define pp pair<int,int>
 
+char deb = 'd';
+
 class json_parser
 {
 	public:
@@ -41,12 +43,14 @@ pp json_parser::json_array(string json,int curr)
 
 	bool flag = true; int indx = curr; 
 
+	bool is_dec = false;
+
 
 	int i=curr;
 
 	for(;i<json.size() && flag;i++)
 	{	
-		cout<<"--> "<<arraystr[curr_state]<<" "<<json[i]<<" "<<i<<endl;
+		if(deb=='d')cout<<"--> "<<arraystr[curr_state]<<" "<<json[i]<<" "<<i<<endl;
 
 		if(curr_state == START_STATE	)
 		{
@@ -117,7 +121,7 @@ pp json_parser::json_array(string json,int curr)
 		    	i += 4;
 		    }
 
-	    	else if(json[i]>='0'&&json[i]<='9')
+	    	else if(json[i]>='0'&&json[i]<='9'||json[i] == '-')
 	    	{
 	    		curr_state = AT_START_INT;
 	    	}
@@ -237,12 +241,45 @@ pp json_parser::json_array(string json,int curr)
 
 		 else if(flag && curr_state == AT_START_INT)
 		 {
-		 	if(json[i]>='0'&&json[i]<='9'||json[i] == '-')
+		 	if(json[i]>='0'&&json[i]<='9')
 		 	{
 		 		curr_state = AT_START_INT;
 		 	}
 
 		 	else if(json[i] == ' '||json[i] == '\n' || json[i] == '\t' )
+		 	{
+		 		curr_state = AT_END_INT;
+		 		is_dec = false;
+		 	}
+
+		 	else if(json[i] == ',')
+		 	{
+		 		curr_state = AT_COMMA_ARRAY;
+		 		is_dec = false;
+		 	}
+
+		 	else if(json[i] == '.' && (json[i-1]>='0'&&json[i-1]<='9') && (json[i+1] >='0' && json[i+1] <='9'))
+		 	{
+		 		if(is_dec == false) is_dec = true;
+
+		 		else
+		 		{
+		 			flag = false;
+		 			curr_state = DEAD_STATE_ARRAY;
+		 		}
+		 	}
+
+		 	else 
+		 	{
+		 		flag = false;
+		 		curr_state = DEAD_STATE_ARRAY;
+
+		 	}
+		 }
+
+		 else if(flag && curr_state == AT_END_INT)
+		 {
+		 	if(json[i] == ' '|| json[i] == '\n' || json[i] == '\t')
 		 	{
 		 		curr_state = AT_END_INT;
 		 	}
@@ -252,11 +289,17 @@ pp json_parser::json_array(string json,int curr)
 		 		curr_state = AT_COMMA_ARRAY;
 		 	}
 
-		 	else 
+		 	else if(json[i] == ']')
+		 	{
+		 		flag = true;
+		 		curr_state = FINAL_STATE_ARRAY;
+		 		break;
+		 	}
+
+		 	else
 		 	{
 		 		flag = false;
 		 		curr_state = DEAD_STATE_ARRAY;
-
 		 	}
 		 }
 
@@ -405,7 +448,7 @@ pp json_parser::json_array(string json,int curr)
 			    	i += 4;
 			    }
 
-		    	else if(json[i]>='0'&&json[i]<='9')
+		    	else if(json[i]>='0'&&json[i]<='9'||json[i] == '-')
 		    	{
 		    		curr_state = AT_START_INT;
 		    	}
@@ -431,7 +474,7 @@ pp json_parser::json_array(string json,int curr)
 
 	}
 
-	cout<<"@ "<<arraystr[curr_state]<<" "<<json[i]<<" "<<i<<" "<<flag<<"\n";
+	if(deb=='d')cout<<"@ "<<arraystr[curr_state]<<" "<<json[i]<<" "<<i<<" "<<flag<<"\n";
 
 	if(curr_state == FINAL_STATE_ARRAY && flag) return {true,i};
 
@@ -444,7 +487,9 @@ pp  json_parser::json_object(string json,int curr)
 {	
 	JSON_OBJECT_STATE curr_state = START_OF_JSON;
 
-	cout<<"\n & "<<objstr[curr_state]<<" "<<json[curr]<<"\n";
+	if(deb=='d')cout<<"\n & "<<objstr[curr_state]<<" "<<json[curr]<<"\n";
+
+	bool is_dec = false;
 
 	unordered_set<string> dup;
 
@@ -454,7 +499,7 @@ pp  json_parser::json_object(string json,int curr)
 
 	for(;i<json.size()&&flag;i++)
 	{
-		cout<<"! "<<objstr[curr_state]<<" "<<json[i]<<" "<<i<<" "<<"\n";
+		if(deb=='d')cout<<"! "<<objstr[curr_state]<<" "<<json[i]<<" "<<i<<" "<<"\n";
 
 		if(curr_state==INITIAL_STATE)
 		{
@@ -474,9 +519,10 @@ pp  json_parser::json_object(string json,int curr)
 
 	    		else
 	    		{
-	    			cout<<" triggered else dead initial "<<i<<" "<<json[i]<<" "<<curr_state<<"\n";
-	    			flag = false;
-	    			curr_state = DEAD_STATE;
+
+	    		if(deb=='d') cout<<" triggered else dead initial "<<i<<" "<<json[i]<<" "<<curr_state<<"\n";
+	    			         flag = false;
+	    			         curr_state = DEAD_STATE;
 	    		}
 	
 			}
@@ -491,8 +537,8 @@ pp  json_parser::json_object(string json,int curr)
 	    		else if(json[i]=='\"')
 	    		{
 
-	    			curr_state = AT_START_OF_KEY_STRING;
-	    			cout<<" triggered at_start_key_string "<<i<<" "<<json[i]<<" "<<objstr[curr_state]<<"\n";
+	    			            curr_state = AT_START_OF_KEY_STRING;
+	    		if(deb=='d')	cout<<" triggered at_start_key_string "<<i<<" "<<json[i]<<" "<<objstr[curr_state]<<"\n";
 
 	    		}
 
@@ -508,7 +554,7 @@ pp  json_parser::json_object(string json,int curr)
 	    			//cout<<" triggered else dead initial "<<i<<" "<<json[i]<<" "<<curr_state<<"\n";
 	    			flag = false;
 	    			curr_state =DEAD_STATE;
-	    			cout<<" triggered else dead initial "<<i<<" "<<json[i]<<" "<<objstr[curr_state]<<"\n";
+	    			if(deb=='d') cout<<" triggered else dead initial "<<i<<" "<<json[i]<<" "<<objstr[curr_state]<<"\n";
 	    		}
 			}
 
@@ -528,17 +574,16 @@ pp  json_parser::json_object(string json,int curr)
 					{
 						flag = false;
 						curr_state = DEAD_STATE;
-						cout<<" contain dup key \n";
+						if(deb=='d') cout<<" contain dup key \n";
 					}
 
 					else
 					{
 						dup.insert(temp);
 					}
-
-					cout<<"key --> "<<temp<<"\n";
-					temp.clear();
-					curr_state = END_OF_KEY_STRING;
+					if(deb=='d') cout<<"key --> "<<temp<<"\n";
+					             temp.clear();
+					             curr_state = END_OF_KEY_STRING;
 				} 
 
 				else
@@ -592,8 +637,8 @@ pp  json_parser::json_object(string json,int curr)
 
 				else if(json[i] >= '0' && json[i] <= '9' || json[i] == '-')
 				{
-					curr_state = AT_START_OF_VALUE_NUM;
-					cout<<"triggered : "<<objstr[curr_state]<<" "<<json[i]<<"\n";
+					             curr_state = AT_START_OF_VALUE_NUM;
+					if(deb=='d') cout<<"triggered : "<<objstr[curr_state]<<" "<<json[i]<<"\n";
 				}
 
 				else if(json[i]=='\"')
@@ -614,8 +659,8 @@ pp  json_parser::json_object(string json,int curr)
 					pp res = json_object(json,i+1);
 					flag = res.first;
 					i = res.second;
-					cout<<"\n res "<<res.first<<" "<<json[res.second]<<" "<<json[res.second+1]<<(i==json.size()-1)<<" "<<i<<" "<<"\n";
-					if(flag) curr_state = JSON_OBJECT_END;
+				if(deb=='d') cout<<"\n res "<<res.first<<" "<<json[res.second]<<" "<<json[res.second+1]<<(i==json.size()-1)<<" "<<i<<" "<<"\n";
+					        if(flag) curr_state = JSON_OBJECT_END;
 				}
 
 				else
@@ -722,7 +767,7 @@ pp  json_parser::json_object(string json,int curr)
 
 			else if(flag&&curr_state==AT_START_OF_VALUE_NUM)
 			{
-				if(isdigit(json[i]))
+				if(json[i]>='0'&&json[i]<='9')
 				{
 					curr_state = AT_START_OF_VALUE_NUM;
 				}
@@ -730,11 +775,26 @@ pp  json_parser::json_object(string json,int curr)
 				else if(json[i]==' '||json[i]=='\n'||json[i]=='\t')
 				{
 					curr_state = END_OF_VALUE_NUM;
+					is_dec = false;
+				}
+
+				else if(json[i] == '.' && (json[i-1] >='0' && json[i-1] <='9') &&  (json[i+1] >='0' && json[i+1] <='9'))
+				{
+					if(deb=='d') cout<<" dec "<<is_dec<<"\n";
+
+					if(is_dec == false) is_dec = true;
+
+					else
+					{
+						flag = false;
+						curr_state = DEAD_STATE;
+					}
 				}
 
 				else if(json[i] == ',')
 				{
 					curr_state = AT_COMMA;
+					is_dec = false;
 				}
 
 				else 
@@ -750,11 +810,13 @@ pp  json_parser::json_object(string json,int curr)
 				if(json[i]==' '||json[i]=='\n'||json[i]=='\t')
 				{
 					curr_state = END_OF_VALUE_NUM;
+					is_dec = false;
 				}
 
 				else if(json[i]==',')
 				{
 					curr_state = AT_COMMA;
+					is_dec = false;
 				}
 
 				else if(json[i] == '}')
@@ -773,7 +835,7 @@ pp  json_parser::json_object(string json,int curr)
 
 			else if(flag && curr_state == AT_START_OF_BOOL_TRUE)
 			{
-				cout<<"\n wow "<<json.substr(i,3)<<"\n";
+				if(deb=='d') cout<<"\n wow "<<json.substr(i,3)<<"\n";
 				if(json.substr(i,3)=="rue")
 				{
 					curr_state = AT_END_OF_BOOL_TRUE;
@@ -815,7 +877,7 @@ pp  json_parser::json_object(string json,int curr)
 
 			else if(flag&&curr_state==AT_START_OF_BOOL_FALSE)
 			{
-				cout<<"\n wow "<<json.substr(i,5)<<"\n";
+				if(deb=='d') cout<<"\n wow "<<json.substr(i,5)<<"\n";
 				if(json.substr(i,4)=="alse")
 				{
 					curr_state = AT_END_OF_BOOL_FLASE;
@@ -860,7 +922,7 @@ pp  json_parser::json_object(string json,int curr)
 			else if(flag&&curr_state==AT_START_OF_NULL_VALUE)
 			{
 
-				cout<<" wow "<<json.substr(i,3)<<"\n";
+				if(deb=='d')cout<<" wow "<<json.substr(i,3)<<"\n";
 
 				if(json.substr(i,3)=="ull")
 				{
@@ -912,7 +974,7 @@ pp  json_parser::json_object(string json,int curr)
 	    		{
 
 	    			curr_state = AT_START_OF_KEY_STRING;
-	    			cout<<" triggered at_start_key_string "<<i<<" "<<json[i]<<" "<<objstr[curr_state]<<"\n";
+	    			if(deb=='d')cout<<" triggered at_start_key_string "<<i<<" "<<json[i]<<" "<<objstr[curr_state]<<"\n";
 
 	    		}
 
@@ -921,7 +983,7 @@ pp  json_parser::json_object(string json,int curr)
 	    			//cout<<" triggered else dead initial "<<i<<" "<<json[i]<<" "<<curr_state<<"\n";
 	    			flag = false;
 	    			curr_state =DEAD_STATE;
-	    			cout<<" triggered else dead initial "<<i<<" "<<json[i]<<" "<<objstr[curr_state]<<"\n";
+	    			if(deb=='d')cout<<" triggered else dead initial "<<i<<" "<<json[i]<<" "<<objstr[curr_state]<<"\n";
 	    		}
 			}	
 
@@ -933,7 +995,7 @@ pp  json_parser::json_object(string json,int curr)
 
 
 
-	cout<<"@ "<<objstr[curr_state]<<" "<<flag<<" "<<i<<" "<<json[i]<<" \n";
+	if(deb=='d') cout<<"@ "<<objstr[curr_state]<<" "<<flag<<" "<<i<<" "<<json[i]<<" \n";
 
 	if((curr_state == FINAL_STATE && flag == true)) return {true,i}; 
 
@@ -957,7 +1019,7 @@ int json_parser::parser(string json)
 			pp res =  json_array(json,index+1);
 			flag = res.first;
 			index =  res.second+1;
-			cout<<"% "<<index<<" "<<json[index]<<"\n";
+		  if(deb=='d')	cout<<"% "<<index<<" "<<json[index]<<"\n";
 			count++;
 		}
 
@@ -966,7 +1028,7 @@ int json_parser::parser(string json)
 			pp res =  json_object(json,index+1);
 			flag = res.first;
 			index = res.second+1;
-			cout<<"~ "<<index<<" "<<json[index]<<"\n";
+		  if(deb=='d')cout<<"~ "<<index<<" "<<json[index]<<"\n";
 			count++;
 		}
 
@@ -982,14 +1044,6 @@ int json_parser::parser(string json)
 
 	}
 
-//	cout<<"\n* "<<json[95]<<" "<<flag<<"\n";
-// cout<<"\n\n****\n";
-// 	// 
-// 	for(int j = 33827;j<=33847;j++)
-// 	{
-// 		cout<<json[j]<<" ";
-// 	}
-
 	cout<<"\n";
 
 	return (flag == true && count == 1); 
@@ -997,8 +1051,10 @@ int json_parser::parser(string json)
 
 
 
-int main()
+int main(int arno,char** args)
 {	
+
+	deb = *(args[1]);
 
 	string file; cin>>file;
 
@@ -1015,16 +1071,16 @@ int main()
 	{
 		json += line;
 
-		cout<<line<<"\n";
+	if(deb=='d')	cout<<line<<"\n";
 	}
 	
-	cout<<"\n\n"<<json<<"\n";
+	if(deb=='d') cout<<"\n\n"<<json<<"\n";
 
 	myfile.close();
 
 	json_parser jp;
 
-	cout<<"\nIs valid : "<<jp.parser(json)<<"\n";
+	cout<<(jp.parser(json)?"Valid Json ":"Invalid Json")<<"\n";
     
 
 
