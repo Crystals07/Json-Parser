@@ -405,6 +405,12 @@ pp json_parser::json_array(string json,int curr)
 		    		flag = true;
 		    		break;
 		    	}
+
+		    	else
+		    	{
+		    		curr_state = DEAD_STATE_ARRAY;
+		    		flag = false;
+		    	}
 		    }
 
 		    else if(flag && curr_state == AT_COMMA_ARRAY)
@@ -456,6 +462,7 @@ pp json_parser::json_array(string json,int curr)
 		    	else if(json.substr(i,4)=="null")
 		    	{
 		    		curr_state = AT_END_NULL_VALUE;
+		    		i += 3;
 		    	}
 
 		    	else
