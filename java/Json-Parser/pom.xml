@@ -1,0 +1,16 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+  <groupId>com.jai.codeofduty</groupId>
+  <artifactId>jsonparser</artifactId>
+  <version>1.0</version>
+  <name>JsonParser</name>
+  <description>Open Source Json Parser develop by Jaideep Rana</description>
+  <!-- https://mvnrepository.com/artifact/com.google.guava/guava-collections -->
+  <dependencies>
+	  <dependency>
+	    <groupId>com.google.guava</groupId>
+	    <artifactId>guava-collections</artifactId>
+	    <version>r03</version>
+	 </dependency>
+  </dependencies>
+</project>
