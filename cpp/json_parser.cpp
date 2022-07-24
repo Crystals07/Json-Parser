@@ -1088,7 +1088,4 @@ int main(int arno,char** args)
 	json_parser jp;
 
 	cout<<(jp.parser(json)?"Valid Json ":"Invalid Json")<<"\n";
-    
-
-
 }
